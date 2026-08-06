@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+char* countAndSay(int n) {
+    if (n <= 0) return NULL;
+    
+    // Allocate an initial buffer for the base case "1"
+    char* current = (char*)malloc(2 * sizeof(char));
+    strcpy(current, "1");
+    
+    for (int i = 2; i <= n; i++) {
+        int len = strlen(current);
+        
+        // Allocate a temporary buffer for the next sequence string.
+        // A safe upper bound for length growth is roughly double the current length.
+        char* next_str = (char*)malloc((len * 2 + 1) * sizeof(char));
+        int next_idx = 0;
+        
+        int count = 1;
+        for (int j = 0; j < len; j++) {
+            // Check if the next character matches the current one
+            if (j + 1 < len && current[j] == current[j + 1]) {
+                count++;
+            } else {
+                // Append count and the digit to the next string buffer
+                next_str[next_idx++] = count + '0';
+                next_str[next_idx++] = current[j];
+                count = 1; // Reset count for the next unique digit
+            }
+        }
+        next_str[next_idx] = '\0'; // Null-terminate the string
+        
+        // Free the old sequence buffer and switch to the new one
+        free(current);
+        current = next_str;
+    }
+    
+    return current;
+}
