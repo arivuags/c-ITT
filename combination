@@ -1,0 +1,64 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Comparison function for sorting candidates
+int compare(const void* a, const void* b) {
+    return (*(int*)a - *(int*)b);
+}
+
+void backtrack(int* candidates, int candidatesSize, int target, int start, 
+               int* current, int currentSize, 
+               int*** result, int* resultSize, int** resultColSizes, int* capacity) {
+    // Base Case: Target reached
+    if (target == 0) {
+        // Double capacity if result array fills up
+        if (*resultSize >= *capacity) {
+            *capacity *= 2;
+            *result = (int**)realloc(*result, (*capacity) * sizeof(int*));
+            *resultColSizes = (int*)realloc(*resultColSizes, (*capacity) * sizeof(int));
+        }
+        
+        // Copy the current combination into results
+        (*result)[*resultSize] = (int*)malloc(currentSize * sizeof(int));
+        memcpy((*result)[*resultSize], current, currentSize * sizeof(int));
+        (*resultColSizes)[*resultSize] = currentSize;
+        (*resultSize)++;
+        return;
+    }
+
+    for (int i = start; i < candidatesSize; i++) {
+        // Pruning: Since the array is sorted, if candidates[i] is greater 
+        // than target, all subsequent candidates will also be too large.
+        if (candidates[i] > target) {
+            break;
+        }
+
+        // Include candidates[i] in the current tracking path
+        current[currentSize] = candidates[i];
+        
+        // Recurse: Note that 'start' stays at 'i' because we can reuse elements
+        backtrack(candidates, candidatesSize, target - candidates[i], i, 
+                  current, currentSize + 1, 
+                  result, resultSize, resultColSizes, capacity);
+    }
+}
+
+int** combinationSum(int* candidates, int candidatesSize, int target, int* returnSize, int** returnColumnSizes) {
+    // Sort candidates to enable effective pruning
+    qsort(candidates, candidatesSize, sizeof(int), compare);
+
+    int capacity = 150; // Initial capacity based on problem constraints
+    int** result = (int**)malloc(capacity * sizeof(int*));
+    *returnColumnSizes = (int*)malloc(capacity * sizeof(int));
+    *returnSize = 0;
+
+    // Temporary working buffer to store current path combinations
+    // The maximum possible length of a combination is target / smallest_candidate (min candidate is 1)
+    int* current = (int*)malloc((target + 1) * sizeof(int));
+
+    backtrack(candidates, candidatesSize, target, 0, current, 0, &result, returnSize, returnColumnSizes, &capacity);
+
+    free(current);
+    return result;
+}
