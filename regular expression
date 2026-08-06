@@ -1,0 +1,57 @@
+#include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
+
+// Helper function to handle the recursive matching with memoization
+bool matchHelper(int i, int j, char* s, char* p, int s_len, int p_len, int** memo) {
+    // If we already calculated this state, return the cached result
+    if (memo[i][j] != -1) {
+        return memo[i][j];
+    }
+
+    // Base case: If we reached the end of the pattern, the string must also be exhausted
+    if (j >= p_len) {
+        return i >= s_len;
+    }
+
+    // Check if the current characters match (or if pattern has '.')
+    bool first_match = (i < s_len && (s[i] == p[j] || p[j] == '.'));
+
+    bool ans;
+    // If the next character in the pattern is '*'
+    if (j + 1 < p_len && p[j + 1] == '*') {
+        // Option 1: Ignore the '*' and its preceding element (match 0 times) -> move pattern by 2
+        // Option 2: If first char matched, consume 1 char from string 's' -> move string by 1, keep pattern
+        ans = matchHelper(i, j + 2, s, p, s_len, p_len, memo) ||
+              (first_match && matchHelper(i + 1, j, s, p, s_len, p_len, memo));
+    } else {
+        // No '*', proceed to check the next single character for both string and pattern
+        ans = first_match && matchHelper(i + 1, j + 1, s, p, s_len, p_len, memo);
+    }
+
+    // Cache the result before returning
+    memo[i][j] = ans ? 1 : 0;
+    return ans;
+}
+
+bool isMatch(char* s, char* p) {
+    int s_len = strlen(s);
+    int p_len = strlen(p);
+
+    // Create a 2D memoization table initialized to -1 (representing unvisited states)
+    int** memo = (int**)malloc((s_len + 1) * sizeof(int*));
+    for (int i = 0; i <= s_len; i++) {
+        memo[i] = (int*)malloc((p_len + 1) * sizeof(int));
+        memset(memo[i], -1, (p_len + 1) * sizeof(int));
+    }
+
+    bool result = matchHelper(0, 0, s, p, s_len, p_len, memo);
+
+    // Free allocated memory
+    for (int i = 0; i <= s_len; i++) {
+        free(memo[i]);
+    }
+    free(memo);
+
+    return result;
+}
