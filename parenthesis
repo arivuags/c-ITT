@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Helper backtracking function
+void backtrack(int n, int open, int close, char* current, int index, char** result, int* returnSize) {
+    // Base Case: If the current string reaches maximum length (2 * n)
+    if (index == 2 * n) {
+        current[index] = '\0'; // Properly null-terminate the string
+        result[*returnSize] = strdup(current);
+        (*returnSize)++;
+        return;
+    }
+
+    // Rule 1: Add an opening bracket if we still have allocation left
+    if (open < n) {
+        current[index] = '(';
+        backtrack(n, open + 1, close, current, index + 1, result, returnSize);
+    }
+
+    // Rule 2: Add a closing bracket if it doesn't break balance rules
+    if (close < open) {
+        current[index] = ')';
+        backtrack(n, open, close + 1, current, index + 1, result, returnSize);
+    }
+}
+
+// Formula to compute Catalan Numbers for exact array allocation sizing
+int getCatalanNumber(int n) {
+    long long c = 1;
+    for (int i = 0; i < n; i++) {
+        c = c * (2 * n - i) / (i + 1);
+    }
+    return c / (n + 1);
+}
+
+char** generateParenthesis(int n, int* returnSize) {
+    *returnSize = 0;
+    if (n <= 0) return NULL;
+
+    // Allocate memory matching the exact total combinations (Catalan Number)
+    int total_combinations = getCatalanNumber(n);
+    char** result = (char**)malloc(total_combinations * sizeof(char*));
+    
+    // Allocate space for the working string structure (+1 for null terminator)
+    char* current = (char*)malloc((2 * n + 1) * sizeof(char));
+
+    // Kick off recursion starting with 0 open brackets and 0 closed brackets
+    backtrack(n, 0, 0, current, 0, result, returnSize);
+
+    free(current);
+    return result;
+}
