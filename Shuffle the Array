@@ -1,0 +1,26 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+/**
+ * Note: The returned array must be dynamically allocated, and the caller 
+ * must free the memory. *returnSize is updated with the size of the returned array.
+ */
+int* shuffle(int* nums, int numsSize, int n, int* returnSize) {
+    // Allocate memory for the interleaved result array
+    int* result = (int*)malloc(numsSize * sizeof(int));
+    *returnSize = numsSize;
+    
+    // xStart tracks elements in the first half [x1, x2, ..., xn]
+    int xStart = 0;
+    // yStart tracks elements in the second half [y1, y2, ..., yn]
+    int yStart = n;
+    
+    // Interleave the elements into the result array
+    for (int i = 0; i < numsSize; i += 2) {
+        result[i] = nums[xStart++];     // Place x element at even index
+        result[i + 1] = nums[yStart++]; // Place y element at odd index
+    }
+    
+    return result;
+}
+
