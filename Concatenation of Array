@@ -1,0 +1,24 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/**
+ * Note: The returned array must be dynamically allocated, and the caller 
+ * must free the memory. *returnSize is updated with the size of the returned array.
+ */
+int* getConcatenation(int* nums, int numsSize, int* returnSize) {
+    // The result array will be exactly twice the size of the input array
+    int targetSize = numsSize * 2;
+    *returnSize = targetSize;
+    
+    // Allocate memory for the concatenated result
+    int* ans = (int*)malloc(targetSize * sizeof(int));
+    
+    // Copy elements into both halves of the new array
+    for (int i = 0; i < numsSize; i++) {
+        ans[i] = nums[i];            // Fill the first half
+        ans[i + numsSize] = nums[i]; // Fill the second half
+    }
+    
+    return ans;
+}
