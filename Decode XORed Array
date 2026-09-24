@@ -1,0 +1,25 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+/**
+ * Note: The returned array must be dynamically allocated, and the caller 
+ * must free the memory. *returnSize is updated with the size of the returned array.
+ */
+int* decode(int* encoded, int encodedSize, int first, int* returnSize) {
+    // The decoded array will have exactly one more element than the encoded array
+    int arrSize = encodedSize + 1;
+    *returnSize = arrSize;
+    
+    // Allocate memory for the final decoded array
+    int* arr = (int*)malloc(arrSize * sizeof(int));
+    
+    // Set the first element as provided
+    arr[0] = first;
+    
+    // Linearly reconstruct the rest of the array using the XOR property
+    for (int i = 0; i < encodedSize; i++) {
+        arr[i + 1] = arr[i] ^ encoded[i];
+    }
+    
+    return arr;
+}
