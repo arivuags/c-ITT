@@ -1,0 +1,82 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure to pair values with their original indices for sorting
+typedef struct {
+    int value;
+    int index;
+} Element;
+
+// Comparator function for qsort to sort elements in ascending order
+int compare(const void* a, const void* b) {
+    int valA = ((Element*)a)->value;
+    int valB = ((Element*)b)->value;
+    if (valA < valB) return -1;
+    if (valA > valB) return 1;
+    return 0;
+}
+
+// Fenwick Tree (Binary Indexed Tree) helper functions
+void update(int* bit, int n, int idx, int val) {
+    for (; idx <= n; idx += idx & -idx) {
+        bit[idx] += val;
+    }
+}
+
+int query(int* bit, int idx) {
+    int sum = 0;
+    for (; idx > 0; idx -= idx & -idx) {
+        sum += bit[idx];
+    }
+    return sum;
+}
+
+// Helper to get sum in range [left, right] (1-based indexing)
+int rangeQuery(int* bit, int left, int right) {
+    if (left > right) return 0;
+    return query(bit, right) - query(bit, left - 1);
+}
+
+// RENAME THIS FUNCTION TO MATCH LEETCODE'S TEMPLATE EXACTLY
+long long countOperationsToEmptyArray(int* nums, int numsSize) {
+    Element* elements = (Element*)malloc(numsSize * sizeof(Element));
+    for (int i = 0; i < numsSize; i++) {
+        elements[i].value = nums[i];
+        elements[i].index = i + 1; // Use 1-based indexing for the Fenwick tree
+    }
+
+    // Sort to process elements from smallest to largest
+    qsort(elements, numsSize, sizeof(Element), compare);
+
+    // Initialize Fenwick Tree with 1s indicating all elements are present
+    int* bit = (int*)calloc(numsSize + 1, sizeof(int));
+    for (int i = 1; i <= numsSize; i++) {
+        update(bit, numsSize, i, 1);
+    }
+
+    long long totalOperations = 0;
+    int currPos = 1; // Start at the first element (1-indexed)
+
+    for (int i = 0; i < numsSize; i++) {
+        int targetIdx = elements[i].index;
+
+        if (targetIdx >= currPos) {
+            // Case 1: Target is ahead of or at the current pointer
+            totalOperations += rangeQuery(bit, currPos, targetIdx);
+        } else {
+            // Case 2: Target is behind, requires wrapping around the circular array
+            totalOperations += rangeQuery(bit, currPos, numsSize);
+            totalOperations += rangeQuery(bit, 1, targetIdx);
+        }
+
+        // Remove the element from the tracking tree
+        update(bit, numsSize, targetIdx, -1);
+        
+        // The next search window starts at the target position
+        currPos = targetIdx;
+    }
+
+    free(elements);
+    free(bit);
+    return totalOperations;
+}
