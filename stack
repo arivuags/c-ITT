@@ -1,0 +1,41 @@
+typedef struct {
+    int *data;
+    int size;
+    int max_size;
+} CustomStack;
+
+
+CustomStack* customStackCreate(int max_size) {
+    CustomStack* stack = (CustomStack*) malloc(sizeof (CustomStack));
+    stack->data = (int*) malloc(max_size * sizeof (int));
+    stack->size = 0;
+    stack->max_size = max_size;
+    return stack;
+}
+
+void customStackPush(CustomStack* stack, int x) {
+    if (stack->size < stack->max_size) {
+        stack->data[stack->size] = x;
+        stack->size++;
+    }
+}
+
+int customStackPop(CustomStack* stack) {
+    if (stack->size > 0) {
+        stack->size--;
+        return stack->data[stack->size];
+    }
+    return -1;
+}
+
+int min(int a, int b) { return a < b ? a : b; }
+
+void customStackIncrement(CustomStack* stack, int k, int val) {
+    for (int i = 0, ei = min(k, stack->size); i < ei; i++) {
+        stack->data[i] += val;
+    }
+}
+
+void customStackFree(CustomStack* stack) {
+    free(stack->data);
+    free(stack);
